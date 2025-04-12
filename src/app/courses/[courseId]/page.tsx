@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { getCourseById } from '@/lib/courses';
+import { getCourseById } from '@/lib/generated/course-structure';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 

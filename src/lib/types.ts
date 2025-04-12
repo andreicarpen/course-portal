@@ -28,4 +28,19 @@ export interface Course {
   title: string;
   overview: string;
   learningPath: Phase[];
+}
+
+// New type for course metadata in definition files
+export interface CourseMetadata {
+  id: string;
+  title: string;
+  overview: string;
+  phaseIds: string[]; // Reference phases by ID
+}
+
+// New type for phase metadata in definition files
+export interface PhaseMetadata {
+  id: string;
+  title: string;
+  moduleIds: string[]; // Reference modules by ID
 } 

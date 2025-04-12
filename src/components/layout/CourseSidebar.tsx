@@ -3,26 +3,35 @@
 import React, { useState, useEffect } from 'react'; // Import useEffect
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import type { Course, Module as CourseModule } from '@/lib/types';
+import type { Course, Module as CourseModule, Week, Lesson } from '@/lib/types';
 import { cn } from "@/lib/utils"; // For conditional classes
 import { useSharedLessonCompletion } from '@/context/LessonCompletionContext'; // Import shared hook
 import { CheckCircle, ChevronDown } from 'lucide-react'; // Import icon
-import { findModuleIdForLesson } from '@/lib/course-structure'; // Updated import path
+import { findModuleIdForLesson } from '@/lib/generated/course-structure'; // Updated import path
 
 interface CourseSidebarProps {
   course: Course;
 }
 
-// Helper function to check module completion
-const isModuleComplete = (module: CourseModule, completedLessons: Set<string>): boolean => {
-  for (const week of module.weeks) {
-    for (const lesson of week.lessons) {
-      if (!completedLessons.has(lesson.id)) {
-        return false; // Found an incomplete lesson
+// ** NEW ** Helper function to calculate module progress
+const calculateModuleProgress = (module: CourseModule, completedLessons: Set<string>): number => {
+  let totalLessons = 0;
+  let completedCount = 0;
+
+  module.weeks.forEach((week: Week) => {
+    week.lessons.forEach((lesson: Lesson) => {
+      totalLessons++;
+      if (completedLessons.has(lesson.id)) {
+        completedCount++;
       }
-    }
+    });
+  });
+
+  if (totalLessons === 0) {
+    return 0; // Avoid division by zero
   }
-  return true; // All lessons in all weeks are complete
+
+  return (completedCount / totalLessons) * 100;
 };
 
 const CourseSidebar = ({ course }: CourseSidebarProps) => {
@@ -77,8 +86,11 @@ const CourseSidebar = ({ course }: CourseSidebarProps) => {
               {phase.title.replace(/^Phase \d+: /, '')} {/* Remove prefix */}
             </h3>
             {phase.modules.map((module) => {
-              const moduleComplete = isModuleComplete(module, completedLessons);
+              // Calculate progress for the current module
+              const progress = calculateModuleProgress(module, completedLessons);
               const isOpen = openModules.has(module.id);
+              const moduleComplete = progress === 100;
+
               return (
                 // Module container
                 <div key={module.id} className="mb-2"> 
@@ -90,7 +102,13 @@ const CourseSidebar = ({ course }: CourseSidebarProps) => {
                     <h4 className="text-base font-medium flex-1">
                       {module.title.replace(/^Module \d+: /, '')} {/* Remove prefix */}
                     </h4>
-                    {moduleComplete && !isOpen && <CheckCircle className="h-4 w-4 text-green-500 ml-2 flex-shrink-0" />} {/* Show check only when closed if complete */}
+                    {/* Display progress % or Checkmark (now always visible) */}
+                    <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">
+                      {moduleComplete ? 
+                        <CheckCircle className="h-4 w-4 text-green-500" /> : 
+                        progress > 0 ? `${progress.toFixed(0)}%` : null 
+                      }
+                    </span>
                     <ChevronDown 
                       className={cn(
                         "h-4 w-4 ml-2 text-muted-foreground flex-shrink-0 transition-transform duration-200",

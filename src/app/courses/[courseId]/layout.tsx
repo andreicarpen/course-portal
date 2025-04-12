@@ -1,5 +1,5 @@
 import React from 'react';
-import { getCourseById } from '@/lib/courses';
+import { getCourseById } from '@/lib/generated/course-structure';
 import { notFound } from 'next/navigation';
 import CourseSidebar from '@/components/layout/CourseSidebar'; // We will create this next
 import { LessonCompletionProvider } from '@/context/LessonCompletionContext'; // Import the provider

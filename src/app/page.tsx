@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { courses as allCoursesData } from '@/lib/courses';
+// Import courses from the GENERATED structure file
+import { courses as allCoursesData } from '@/lib/generated/course-structure';
 
 export default function Home() {
   const courses = allCoursesData;
